@@ -1,19 +1,29 @@
 const { Client, GatewayIntentBits, Events } = require('discord.js');
-const { joinVoiceChannel, createAudioPlayer, createAudioResource, StreamType, VoiceConnectionStatus } = require('@discordjs/voice');
+const { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus, VoiceConnectionStatus } = require('@discordjs/voice');
 const path = require('path');
-const { createReadStream } = require('fs');
-const { spawn } = require('child_process');
 const http = require('http');
+const sodium = require('libsodium-wrappers');
 
-require('dotenv').config();
+(async () => {
+  await sodium.ready;
+})();
 
 const DISCORD_TOKEN = process.env.TOKEN;
+
 const GUILD_ID = '1306293608223346808';
 const VOICE_CHANNEL_ID = '1306301103373029408';
-const AUDIO_PATH = path.join(__dirname, 'son.mp3');
+const AUDIO_PATHS = [
+  path.join(__dirname, 'son.mp3'),
+  path.join(__dirname, 'son2.mp3')
+];
+
+let currentIndex = 0;
 
 const client = new Client({
-  intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates]
+  intents: [
+    GatewayIntentBits.Guilds,
+    GatewayIntentBits.GuildVoiceStates
+  ]
 });
 
 client.once(Events.ClientReady, async () => {
@@ -30,42 +40,49 @@ client.once(Events.ClientReady, async () => {
 
   const player = createAudioPlayer();
 
-  // ⏺️ Stream ffmpeg infini
-  const playLoop = () => {
-    const ffmpeg = spawn('ffmpeg', [
-      '-stream_loop', '-1', // boucle infinie
-      '-i', AUDIO_PATH,
-      '-f', 's16le',
-      '-ar', '48000',
-      '-ac', '2',
-      'pipe:1'
-    ]);
-
-    const resource = createAudioResource(ffmpeg.stdout, {
-      inputType: StreamType.Raw
-    });
-
+  const playSound = () => {
+    const resource = createAudioResource(AUDIO_PATHS[currentIndex]);
     player.play(resource);
+    console.log(`▶️ Lecture de : ${AUDIO_PATHS[currentIndex]}`);
+    currentIndex = (currentIndex + 1) % AUDIO_PATHS.length;
+
+    setTimeout(() => {
+      if (player.state.status === AudioPlayerStatus.Idle) {
+        console.log('🔁 Redémarrage de secours du son');
+        playSound();
+      }
+    }, 5000);
   };
+
+  player.on(AudioPlayerStatus.Idle, () => {
+    console.log('🔄 Son terminé, relance');
+    playSound();
+  });
+
+  player.on('error', error => {
+    console.error('❌ Erreur player :', error);
+    player.stop();
+    playSound();
+  });
 
   connection.subscribe(player);
 
   connection.on(VoiceConnectionStatus.Ready, () => {
     console.log('🔊 Connecté au salon vocal');
-    playLoop();
+    playSound();
   });
 
   connection.on('error', console.error);
-  player.on('error', console.error);
-});
-
-// 🔒 HTTP pour Render
-const PORT = process.env.PORT || 3000;
-http.createServer((req, res) => {
-  res.writeHead(200, { 'Content-Type': 'text/plain' });
-  res.end('Bot Discord vocal en ligne ✅');
-}).listen(PORT, () => {
-  console.log(`🌐 Serveur HTTP actif sur le port ${PORT}`);
 });
 
 client.login(DISCORD_TOKEN);
+
+// 🌐 Serveur HTTP
+const server = http.createServer((req, res) => {
+  res.writeHead(200, { 'Content-Type': 'text/plain' });
+  res.end('Bot Discord en ligne ✅');
+});
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`🌐 Serveur HTTP actif sur le port ${PORT}`);
+});
