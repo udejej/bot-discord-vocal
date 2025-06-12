@@ -1,0 +1,14 @@
+{
+  "name": "bot-discord-vocal",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.11.0",
+    "@discordjs/voice": "^0.14.0",
+    "ffmpeg-static": "^4.4.0",
+    "dotenv": "^16.0.3"
+  }
+}
