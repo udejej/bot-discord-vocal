@@ -1,9 +1,14 @@
 const { Client, GatewayIntentBits, Events } = require('discord.js');
-const { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus, VoiceConnectionStatus, entersState } = require('@discordjs/voice');
-const fs = require('fs');
+const { joinVoiceChannel, createAudioPlayer, createAudioResource, AudioPlayerStatus, VoiceConnectionStatus } = require('@discordjs/voice');
 const path = require('path');
 
-require('dotenv').config();
+// 👉 Ton token est stocké dans Render sous le nom "TOKEN"
+const DISCORD_TOKEN = process.env.TOKEN;
+
+// Remplace par les bons IDs :
+const GUILD_ID = '1306293608223346808';
+const VOICE_CHANNEL_ID = '1306301103373029408';
+const AUDIO_PATH = path.join(__dirname, 'son.mp3');
 
 const client = new Client({
   intents: [
@@ -11,10 +16,6 @@ const client = new Client({
     GatewayIntentBits.GuildVoiceStates
   ]
 });
-
-const GUILD_ID = '1306293608223346808'; // Remplace par l'ID de ton serveur
-const VOICE_CHANNEL_ID = '1306301103373029408'; // Remplace par l'ID du salon vocal
-const AUDIO_PATH = path.join(__dirname, 'son.mp3'); // Ton fichier audio
 
 client.once(Events.ClientReady, async () => {
   console.log(`✅ Connecté en tant que ${client.user.tag}`);
@@ -36,7 +37,7 @@ client.once(Events.ClientReady, async () => {
   };
 
   player.on(AudioPlayerStatus.Idle, () => {
-    playSound(); // Relance le son à la fin
+    playSound(); // Relance le son automatiquement
   });
 
   connection.subscribe(player);
@@ -50,4 +51,4 @@ client.once(Events.ClientReady, async () => {
   player.on('error', console.error);
 });
 
-client.login(process.env.TOKEN);
+client.login(DISCORD_TOKEN);
