@@ -9,7 +9,7 @@
     "discord.js": "^14.11.0",
     "@discordjs/voice": "^0.14.0",
     "ffmpeg-static": "^4.4.0",
-    "libsodium-wrappers": "^0.7.9"
-    "dotenv": "^16.0.3",
+    "libsodium-wrappers": "^0.7.9",
+    "dotenv": "^16.0.3"
   }
 }
