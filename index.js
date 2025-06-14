@@ -10,8 +10,8 @@ const sodium = require('libsodium-wrappers');
 
 const DISCORD_TOKEN = process.env.TOKEN;
 
-const GUILD_ID = '1306293608223346808';
-const VOICE_CHANNEL_ID = '1306301103373029408';
+const GUILD_ID = '1293654645906083880';
+const VOICE_CHANNEL_ID = '1300525691367981117';
 const AUDIO_PATHS = [
   path.join(__dirname, 'son.mp3'),
   path.join(__dirname, 'son2.mp3')
